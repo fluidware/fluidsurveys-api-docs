@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% if not g.user %}
+	<p>You are not logged in. <a href="/auth/login/">Log in</a></p>
+{% else %}
+	<p>Logged in as {{ g.user.username }}. <a href="/auth/logout/">Log out</a></p>
+
+	<h2>Clients</h2>
+
+	<table>
+		<thead>
+			<tr>
+				<th></th>
+				{% for survey in surveys %}
+					<th>{{ survey.name }}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for client in clients %}
+				{% set responses = client.responses %}
+				<tr>
+					<th>{{ client.username }}</th>
+					{% for survey in surveys %}
+					<td>
+						{% if survey.id in responses %}
+							<a href="{{ survey.deploy_uri }}{{ responses[survey.id].key }}/">Pending</a>
+						{% endif %}
+					</td>
+					{% endfor %}
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<h2>Send Assessment</h2>
+
+	<form method="post" action="">
+		<div>
+			<label for="assessment">Assessment:</label>
+			<select name="assessment" id="assessment">
+			{% for survey in surveys %}
+				<option value="{{ survey.id }}">{{ survey.name }}</option>
+			{% endfor %}
+			</select>
+		</div>
+		<div>
+			<label for="client">Client:</label>
+			<select name="client" id="client">
+			{% for client in clients %}
+				<option value="{{ client.username }}">{{ client.username }}</option>
+			{% endfor %}
+			</select>
+		</div>
+		<div>
+			<input type="submit" value="Send assessment" />
+		</div>
+	</form>
+{% endif %}
+{% endblock %}
