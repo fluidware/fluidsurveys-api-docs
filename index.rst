@@ -63,6 +63,12 @@ endpoint is used:
 	:form survey: the identifier of the survey which requires authorization.
 	:form response: the key of the response which requires authorization.
 
+There is also a `sample application`_ written in Python using Flask_ which demonstrates
+the use of custom authentication.
+
+.. _Flask: http://flask.pocoo.org/
+.. _sample application: https://github.com/chideit/fluidsurveys-api-docs/tree/master/examples/custom-auth
+
 Surveys
 -------
 
