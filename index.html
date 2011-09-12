@@ -1,0 +1,276 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>FluidSurveys Developer Documentation &mdash; FluidSurveys v3.1 documentation</title>
+    <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '3.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="FluidSurveys v3.1 documentation" href="#" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+  
+  
+  <div class=indexwrapper>
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li><a href="#">FluidSurveys v3.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fluidsurveys-developer-documentation">
+<h1>FluidSurveys Developer Documentation<a class="headerlink" href="#fluidsurveys-developer-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<div class="section" id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h2>
+<p>The custom authentication feature allows you to integrate FluidSurveys with your external
+CMS or websites requiring user login. This is done using the standardized
+<a class="reference external" href="http://tools.ietf.org/html/draft-ietf-oauth-v2-20">OAuth 2.0 protocol</a>.</p>
+<p>Whenever a request for a survey is made, if custom authentication is enabled, FluidSurveys
+will begin the OAuth 2.0 authorization code flow as a client using the current deployment
+channel&#8217;s settings (client ID/secret and authorization/token endpoints). These endpoints
+must support transport-layer security (https). Also, to prevent session hijacking, client
+authentication should be performed.</p>
+<div class="section" id="oauth-2-0-protocol-flow">
+<h3>OAuth 2.0 Protocol Flow<a class="headerlink" href="#oauth-2-0-protocol-flow" title="Permalink to this headline">¶</a></h3>
+<p>A survey with custom authentication enabled will first redirect the user-agent (browser)
+to the <em>authorization endpoint</em> with the following GET parameters:</p>
+<dl class="get">
+<dt id="get-(endpoint_uri)-authorization">
+<tt class="descname">GET </tt><tt class="descname"></tt><big>(</big><em>endpoint_uri</em><big>)</big><tt class="descname">/authorization</tt><a class="headerlink" href="#get-(endpoint_uri)-authorization" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
+<tr class="field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>response_type</strong> &#8211; will always be set to the value <tt class="docutils literal"><span class="pre">code</span></tt>.</li>
+<li><strong>client_id</strong> &#8211; the OAuth client ID assigned to FluidSurveys (currently <tt class="docutils literal"><span class="pre">fluidsurveys</span></tt>).</li>
+<li><strong>redirect_uri</strong> &#8211; the OAuth callback URI that the user will be redirected to after authenticating.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>This page should authenticate the user, and a temporary authorization code associated with
+the client ID and redirection URI should be generated.</p>
+<p>When the user returns to the <cite>redirect_uri</cite> with an authentication code in the query
+parameters, FluidSurveys requests an <em>access token</em> from the <em>token endpoint</em>. This token
+allows OAuth-authenticated method calls for permission checking. The token endpoint must
+support both the <tt class="docutils literal"><span class="pre">authorization_code</span></tt> and <tt class="docutils literal"><span class="pre">refresh_token</span></tt> grant types. For
+session-based authentication, it is easiest to set both the refresh and access tokens to
+the user&#8217;s session identifier. This allows you to expire the tokens easily when the user
+is logged out from your system. For more details, see <a class="reference external" href="http://tools.ietf.org/html/draft-ietf-oauth-v2-20#section-4.1">Section 4.1</a> of the RFC.</p>
+<dl class="post">
+<dt id="post-(endpoint_uri)-token">
+<tt class="descname">POST </tt><tt class="descname"></tt><big>(</big><em>endpoint_uri</em><big>)</big><tt class="descname">/token</tt><a class="headerlink" href="#post-(endpoint_uri)-token" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name" colspan="2">Form Parameters:</th></tr>
+<tr class="field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>grant_type</strong> &#8211; one of <tt class="docutils literal"><span class="pre">authorization_code</span></tt> or <tt class="docutils literal"><span class="pre">refresh_token</span></tt>.</li>
+<li><strong>client_id</strong> &#8211; the OAuth client ID assigned to FluidSurveys (currently <tt class="docutils literal"><span class="pre">fluidsurveys</span></tt>).</li>
+<li><strong>redirect_uri</strong> &#8211; the OAuth callback URI that the user will be redirected to after authenticating.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>To check for authorization for a session to a given survey and response, a third OAuth
+endpoint is used:</p>
+<dl class="post">
+<dt id="post-(endpoint_uri)-callback">
+<tt class="descname">POST </tt><tt class="descname"></tt><big>(</big><em>endpoint_uri</em><big>)</big><tt class="descname">/callback</tt><a class="headerlink" href="#post-(endpoint_uri)-callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should return an <tt class="docutils literal"><span class="pre">invalid_grant</span></tt> error if there is no user authenticated
+with the access token. If the user is recognized but is denied access to the response,
+this should return an HTTP 404 response instead.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name" colspan="2">Form Parameters:</th></tr>
+<tr class="field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> &#8211; currently only <tt class="docutils literal"><span class="pre">access_response</span></tt>.</li>
+<li><strong>survey</strong> &#8211; the identifier of the survey which requires authorization.</li>
+<li><strong>response</strong> &#8211; the key of the response which requires authorization.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="surveys">
+<h2>Surveys<a class="headerlink" href="#surveys" title="Permalink to this headline">¶</a></h2>
+<dl class="get">
+<dt id="get--api-v2-surveys-">
+<tt class="descname">GET </tt><tt class="descname">/api/v2/surveys/</tt><a class="headerlink" href="#get--api-v2-surveys-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns surveys that are accessible to the currently authenticated user. This method
+returns data in <em class="mimetype">application/json</em> format.</p>
+<p>Sample response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="s">&quot;surveys&quot;</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="mi">17461</span><span class="p">,</span>
+    <span class="s">&quot;uri&quot;</span><span class="p">:</span> <span class="s">&quot;https://app.fluidsurveys.com/api/v2/surveys/17461/&quot;</span><span class="p">,</span>
+    <span class="s">&quot;deploy_uri&quot;</span><span class="p">:</span> <span class="s">&quot;http://app.fluidsurveys.com/s/test-survey/&quot;</span><span class="p">,</span>
+    <span class="s">&quot;responses&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s">&quot;creator&quot;</span><span class="p">:</span> <span class="s">&quot;username&quot;</span><span class="p">,</span>
+    <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;survey name&quot;</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--api-v2-surveys-(id)-">
+<tt class="descname">GET </tt><tt class="descname">/api/v2/surveys/</tt><big>(</big><em>id</em><big>)</big><tt class="descname">/</tt><a class="headerlink" href="#get--api-v2-surveys-(id)-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns details about the specified survey. This method returns data in
+<em class="mimetype">application/json</em> format.</p>
+<p>Sample response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="mi">17461</span><span class="p">,</span>
+  <span class="s">&quot;uri&quot;</span><span class="p">:</span> <span class="s">&quot;https://app.fluidsurveys.com/api/v2/surveys/17461/&quot;</span><span class="p">,</span>
+  <span class="s">&quot;deploy_uri&quot;</span><span class="p">:</span> <span class="s">&quot;http://app.fluidsurveys.com/s/test-survey/&quot;</span><span class="p">,</span>
+  <span class="s">&quot;responses&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+  <span class="s">&quot;creator&quot;</span><span class="p">:</span> <span class="s">&quot;username&quot;</span><span class="p">,</span>
+  <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;survey name&quot;</span><span class="p">,</span>
+  <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;survey title&quot;</span><span class="p">,</span>
+  <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;survey description&quot;</span><span class="p">,</span>
+  <span class="s">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&quot;var1&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;string&quot;</span><span class="p">,</span>
+      <span class="s">&quot;label&quot;</span><span class="p">:</span> <span class="s">&quot;Question 1&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--api-v2-surveys-(id)-responses-">
+<tt class="descname">GET </tt><tt class="descname">/api/v2/surveys/</tt><big>(</big><em>id</em><big>)</big><tt class="descname">/responses/</tt><a class="headerlink" href="#get--api-v2-surveys-(id)-responses-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of responses to the specified survey that are accessible to the
+currently authenticated user. Pagination is supported through the <cite>offset</cite> and
+<cite>limit</cite> query parameters. This method returns data in <em class="mimetype">application/json</em>
+format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
+<tr class="field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>offset</strong> &#8211; response pagination offset (defaults to 0).</li>
+<li><strong>limit</strong> &#8211; maximum number of results to return (defaults to 10).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Sample response:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+  <span class="s">&quot;responses&quot;</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="s">&quot;_completed&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s">&quot;_ip_address&quot;</span><span class="p">:</span> <span class="s">&quot;0.0.0.0&quot;</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s">&quot;_completed&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s">&quot;_ip_address&quot;</span><span class="p">:</span> <span class="s">&quot;0.0.0.0&quot;</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="post">
+<dt id="post--api-v2-surveys-(id)-responses-">
+<tt class="descname">POST </tt><tt class="descname">/api/v2/surveys/</tt><big>(</big><em>id</em><big>)</big><tt class="descname">/responses/</tt><a class="headerlink" href="#post--api-v2-surveys-(id)-responses-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new response to the survey specified by <tt class="docutils literal"><span class="pre">id</span></tt>.</p>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--api-v2-surveys-(id)-csv-">
+<tt class="descname">GET </tt><tt class="descname">/api/v2/surveys/</tt><big>(</big><em>id</em><big>)</big><tt class="descname">/csv/</tt><a class="headerlink" href="#get--api-v2-surveys-(id)-csv-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns details about the specified survey.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FluidSurveys Developer Documentation</a><ul>
+<li><a class="reference internal" href="#authentication">Authentication</a><ul>
+<li><a class="reference internal" href="#oauth-2-0-protocol-flow">OAuth 2.0 Protocol Flow</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#surveys">Surveys</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">
+    &copy; Copyright 2011, chide.it Inc..
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  
+  </div>
+  
+  </body>
+</html>
