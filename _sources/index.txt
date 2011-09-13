@@ -69,8 +69,11 @@ the use of custom authentication.
 .. _Flask: http://flask.pocoo.org/
 .. _sample application: https://github.com/chideit/fluidsurveys-api-docs/tree/master/examples/custom-auth
 
-Surveys
--------
+REST API
+--------
+
+The REST API is accessed through HTTPS with Basic authentication using the user's API key
+and password.
 
 .. http:get:: /api/v2/surveys/
 
@@ -141,6 +144,12 @@ Surveys
 .. http:post:: /api/v2/surveys/(id)/responses/
 
 	Creates a new response to the survey specified by ``id``.
+
+.. http:delete:: /api/v2/surveys/(id)/responses/
+
+	Deletes response(s) to the survey specified by ``id``.
+
+	:query response_ids: a "``+``"-separated list of response identifiers to be deleted.
 
 .. http:get:: /api/v2/surveys/(id)/csv/
 

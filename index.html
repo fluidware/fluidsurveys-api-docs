@@ -146,8 +146,10 @@ this should return an HTTP 404 response instead.</p>
 the use of custom authentication.</p>
 </div>
 </div>
-<div class="section" id="surveys">
-<h2>Surveys<a class="headerlink" href="#surveys" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="rest-api">
+<h2>REST API<a class="headerlink" href="#rest-api" title="Permalink to this headline">¶</a></h2>
+<p>The REST API is accessed through HTTPS with Basic authentication using the user&#8217;s API key
+and password.</p>
 <dl class="get">
 <dt id="get--api-v2-surveys-">
 <tt class="descname">GET </tt><tt class="descname">/api/v2/surveys/</tt><a class="headerlink" href="#get--api-v2-surveys-" title="Permalink to this definition">¶</a></dt>
@@ -236,6 +238,24 @@ format.</p>
 <dd><p>Creates a new response to the survey specified by <tt class="docutils literal"><span class="pre">id</span></tt>.</p>
 </dd></dl>
 
+<dl class="delete">
+<dt id="delete--api-v2-surveys-(id)-responses-">
+<tt class="descname">DELETE </tt><tt class="descname">/api/v2/surveys/</tt><big>(</big><em>id</em><big>)</big><tt class="descname">/responses/</tt><a class="headerlink" href="#delete--api-v2-surveys-(id)-responses-" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes response(s) to the survey specified by <tt class="docutils literal"><span class="pre">id</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name" colspan="2">Query Parameters:</th></tr>
+<tr class="field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>response_ids</strong> &#8211; a &#8220;<tt class="docutils literal"><span class="pre">+</span></tt>&#8220;-separated list of response identifiers to be deleted.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="get">
 <dt id="get--api-v2-surveys-(id)-csv-">
 <tt class="descname">GET </tt><tt class="descname">/api/v2/surveys/</tt><big>(</big><em>id</em><big>)</big><tt class="descname">/csv/</tt><a class="headerlink" href="#get--api-v2-surveys-(id)-csv-" title="Permalink to this definition">¶</a></dt>
@@ -258,7 +278,7 @@ format.</p>
 <li><a class="reference internal" href="#oauth-2-0-protocol-flow">OAuth 2.0 Protocol Flow</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#surveys">Surveys</a></li>
+<li><a class="reference internal" href="#rest-api">REST API</a></li>
 </ul>
 </li>
 </ul>
